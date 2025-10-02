@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio - Python & Chatbot Developer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    nav {
+      background: #444;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    section {
+      padding: 40px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    footer {
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      margin-top: 30px;
+    }
+    .btn {
+      background: green;
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background: darkgreen;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Priyanshu Chauhan</h1>
+    <p>Python Developer | HTML Designer | Chatbot Creator</p>
+  </header>
+
+  <nav>
+    <a href="#about">About Me</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <section id="about" class="card">
+    <h2>About Me</h2>
+    <p>
+      Hi! 👋 I’m an 18-year-old developer specializing in 
+      <strong>Python programming, HTML websites, and chatbot development</strong>.
+      I love creating useful automation tools, simple websites, and intelligent chatbots
+      that make life easier.
+    </p>
+  </section>
+
+  <section id="projects" class="card">
+    <h2>Projects</h2>
+
+    <h3>🔹 Python Automation</h3>
+    <p>Created Python scripts for web scraping, file automation, and data handling.</p>
+
+    <h3>🔹 HTML Websites</h3>
+    <p>Designed responsive websites with HTML, CSS, and a bit of JavaScript for clients and practice.</p>
+
+    <h3>🔹 Chatbots</h3>
+    <p>Developed chatbots for Telegram and Discord that can reply to users, manage groups, and connect with APIs.</p>
+  </section>
+
+  <section id="contact" class="card">
+    <h2>Contact Me</h2>
+    <p>Email: <a href="mailto:yourmail@gmail.com">yourmail@gmail.com</a></p>
+    <p>Fiverr: <a href="https://www.fiverr.com/" target="_blank">My Fiverr Profile</a></p>
+    <p><a href="#" class="btn">Hire Me</a></p>
+  </section>
+
+  <footer>
+    <p>© 2025 Priyanshu Chauhan | Portfolio Website</p>
+  </footer>
+
+</body>
+</html>
