@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useHabits } from "@/hooks/use-habits"
 import { useSettings } from "@/hooks/use-settings"
 import { useReminder } from "@/hooks/use-reminder"
@@ -35,6 +35,11 @@ export default function Page() {
   const [statsId, setStatsId] = useState<string | null>(null)
   const today = new Date()
 
+  // Avoid hydration mismatch: the date string depends on the client's clock /
+  // timezone, so only render it after mount.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const statsHabit = useMemo(
     () => habits.find((h) => h.id === statsId) ?? null,
     [habits, statsId],
@@ -47,7 +52,9 @@ export default function Page() {
           {/* Header */}
           <header className="mb-6">
             <h1 className="font-hand text-5xl leading-none text-primary sm:text-6xl">My Habit Diary</h1>
-            <p className="mt-1 text-lg text-muted-foreground">{longDate(today)}</p>
+            <p className="mt-1 text-lg text-muted-foreground" suppressHydrationWarning>
+              {mounted ? longDate(today) : "\u00A0"}
+            </p>
           </header>
 
           {/* Add habit */}
