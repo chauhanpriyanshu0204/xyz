@@ -37,12 +37,12 @@ export function DayHistory({ habits, selected, onSelect, onToggle, onOpenStats }
           type="button"
           onClick={() => onSelect(addDays(selected, -1))}
           aria-label="Previous day"
-          className="rounded-md border-2 border-border px-3 py-1 text-lg text-foreground transition-colors hover:border-primary hover:text-primary"
+          className="shrink-0 rounded-md border-2 border-border px-2 py-1 text-base text-foreground transition-colors hover:border-primary hover:text-primary sm:px-3 sm:text-lg"
         >
           ‹ Prev
         </button>
 
-        <div className="flex flex-col items-center text-center">
+        <div className="flex min-w-0 flex-1 flex-col items-center text-center">
           <input
             type="date"
             value={selectedKey}
@@ -51,9 +51,9 @@ export function DayHistory({ habits, selected, onSelect, onToggle, onOpenStats }
               if (e.target.value) onSelect(parseDateKey(e.target.value))
             }}
             aria-label="Pick a date"
-            className="bg-transparent text-center text-lg text-primary focus:outline-none"
+            className="w-full max-w-[10rem] bg-transparent text-center text-base text-primary focus:outline-none sm:text-lg"
           />
-          <span className="text-base text-muted-foreground">{longDate(selected)}</span>
+          <span className="truncate text-sm text-muted-foreground sm:text-base">{longDate(selected)}</span>
         </div>
 
         <button
@@ -62,7 +62,7 @@ export function DayHistory({ habits, selected, onSelect, onToggle, onOpenStats }
           disabled={!canGoForward}
           aria-label="Next day"
           className={cn(
-            "rounded-md border-2 border-border px-3 py-1 text-lg text-foreground transition-colors hover:border-primary hover:text-primary",
+            "shrink-0 rounded-md border-2 border-border px-2 py-1 text-base text-foreground transition-colors hover:border-primary hover:text-primary sm:px-3 sm:text-lg",
             !canGoForward && "cursor-not-allowed opacity-40 hover:border-border hover:text-foreground",
           )}
         >

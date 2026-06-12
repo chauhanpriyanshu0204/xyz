@@ -9,6 +9,8 @@ export type Settings = {
   showWidget: boolean
   /** Per-habit reminder opt-out. Missing key = enabled (true). */
   habitNotify: HabitNotifyMap
+  /** Whether the first-open permission prompt has been shown/dismissed. */
+  permissionPrompted: boolean
 }
 
 export const SETTINGS_KEY = "habit-diary:settings:v1"
@@ -18,6 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reminderTime: "21:00",
   showWidget: true,
   habitNotify: {},
+  permissionPrompted: false,
 }
 
 export function loadSettings(): Settings {
@@ -64,4 +67,30 @@ export function formatTime12h(time: string): string {
   const period = h >= 12 ? "PM" : "AM"
   const hour12 = h % 12 === 0 ? 12 : h % 12
   return `${hour12}:${String(m || 0).padStart(2, "0")} ${period}`
+}
+
+/** True when running on an iPhone/iPad. */
+export function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false
+  const ua = navigator.userAgent
+  const iOSDevice = /iPad|iPhone|iPod/.test(ua)
+  // iPadOS 13+ reports as Mac; detect via touch points.
+  const iPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1
+  return iOSDevice || iPadOS
+}
+
+/** True when the app is launched from the Home Screen (installed PWA). */
+export function isStandalone(): boolean {
+  if (typeof window === "undefined") return false
+  const iosStandalone = (window.navigator as { standalone?: boolean }).standalone === true
+  const displayMode = window.matchMedia?.("(display-mode: standalone)").matches === true
+  return iosStandalone || displayMode
+}
+
+/**
+ * On iOS, the Notification API only works when the app is installed to the
+ * Home Screen (iOS 16.4+). Returns true if the user must install first.
+ */
+export function iosNeedsInstall(): boolean {
+  return isIOS() && !isStandalone()
 }

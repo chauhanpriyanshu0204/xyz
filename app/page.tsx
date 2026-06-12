@@ -12,6 +12,7 @@ import { MonthlySummary } from "@/components/monthly-summary"
 import { HabitStatsDrawer } from "@/components/habit-stats-drawer"
 import { SettingsPanel } from "@/components/settings-panel"
 import { FloatingWidget } from "@/components/floating-widget"
+import { NotificationPrompt } from "@/components/notification-prompt"
 import { longDate } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
@@ -40,9 +41,9 @@ export default function Page() {
   )
 
   return (
-    <main className="desk-surface min-h-screen w-full px-3 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-4xl">
-        <div className="notebook-paper notebook-margin relative rounded-sm px-4 py-6 pl-12 sm:px-8 sm:py-8 sm:pl-16">
+    <main className="desk-surface min-h-dvh w-full overflow-x-hidden px-3 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-4xl">
+        <div className="notebook-paper notebook-margin relative overflow-hidden rounded-sm px-4 py-6 pl-12 sm:px-8 sm:py-8 sm:pl-16">
           {/* Header */}
           <header className="mb-6">
             <h1 className="font-hand text-5xl leading-none text-primary sm:text-6xl">My Habit Diary</h1>
@@ -121,6 +122,14 @@ export default function Page() {
       {settingsLoaded && settings.showWidget && (
         <FloatingWidget habits={habits} onToggle={toggleCell} />
       )}
+
+      <NotificationPrompt
+        show={settingsLoaded && !settings.permissionPrompted}
+        permission={permission}
+        onEnable={requestPermission}
+        onEnabled={() => update({ notificationsEnabled: true })}
+        onDismiss={() => update({ permissionPrompted: true })}
+      />
     </main>
   )
 }

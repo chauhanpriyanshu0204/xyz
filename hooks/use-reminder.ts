@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { type Settings, timeToTodayDate } from "@/lib/settings"
+import { requestOneSignalPermission, syncReminderTags } from "@/lib/onesignal"
 
 const LAST_NOTIFIED_KEY = "habit-diary:lastNotified:v1"
 
@@ -28,10 +29,22 @@ export function useReminder(settings: Settings, loaded: boolean) {
 
   const requestPermission = async (): Promise<Permission> => {
     if (typeof window === "undefined" || !("Notification" in window)) return "unsupported"
-    const result = (await Notification.requestPermission()) as Permission
+    // Route through OneSignal so the user is subscribed to push, then read
+    // back the resulting browser permission state.
+    const result = (await requestOneSignalPermission()) as Permission
     setPermission(result)
     return result
   }
+
+  // Keep OneSignal tags in sync so the dashboard Recurring message can target
+  // this user by reminder_enabled / reminder_time.
+  useEffect(() => {
+    if (!loaded) return
+    syncReminderTags({
+      enabled: settings.notificationsEnabled,
+      time: settings.reminderTime,
+    })
+  }, [settings.notificationsEnabled, settings.reminderTime, loaded])
 
   useEffect(() => {
     if (!loaded) return
@@ -77,7 +90,7 @@ function fireReminder() {
   }
 
   new Notification("My Habit Diary", {
-    body: "Hey! Don't forget to log your habits today 📝",
+    body: "📝 Don't forget to log your habits today!",
     icon: "/icon.png",
     tag: "habit-daily-reminder",
   })
@@ -88,7 +101,7 @@ export function sendTestReminder(): boolean {
   if (typeof window === "undefined" || !("Notification" in window)) return false
   if (Notification.permission !== "granted") return false
   new Notification("My Habit Diary", {
-    body: "Hey! Don't forget to log your habits today 📝",
+    body: "📝 Don't forget to log your habits today!",
     icon: "/icon.png",
     tag: "habit-daily-reminder-test",
   })

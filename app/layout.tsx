@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Caveat, Patrick_Hand } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const patrickHand = Patrick_Hand({
@@ -51,6 +52,21 @@ export default function RootLayout({
       className={`${patrickHand.variable} ${caveat.variable} bg-background`}
     >
       <body className="font-sans antialiased">
+        <Script
+          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+          strategy="afterInteractive"
+        />
+        <Script id="onesignal-init" strategy="afterInteractive">
+          {`
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            OneSignalDeferred.push(async function (OneSignal) {
+              await OneSignal.init({
+                appId: "b6633067-cce4-4df2-840f-ed508120179a",
+                allowLocalhostAsSecureOrigin: true,
+              });
+            });
+          `}
+        </Script>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

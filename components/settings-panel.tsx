@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { Habit } from "@/lib/habits"
-import { type Settings, formatTime12h, isHabitNotifyOn } from "@/lib/settings"
+import { type Settings, formatTime12h, isHabitNotifyOn, iosNeedsInstall } from "@/lib/settings"
 import { sendTestReminder } from "@/hooks/use-reminder"
 import { cn } from "@/lib/utils"
 
@@ -26,6 +26,7 @@ export function SettingsPanel({
   onRequestPermission,
 }: SettingsPanelProps) {
   const [testMsg, setTestMsg] = useState<string | null>(null)
+  const needsInstall = iosNeedsInstall()
 
   const handleEnableToggle = async (next: boolean) => {
     if (next && permission !== "granted") {
@@ -62,6 +63,16 @@ export function SettingsPanel({
           <p className="mt-3 rounded-md bg-accent/10 px-3 py-2 text-base text-accent">
             Notifications are blocked. Enable them in your browser settings to use reminders.
           </p>
+        )}
+        {needsInstall && permission !== "granted" && (
+          <div className="mt-3 rounded-md bg-accent/10 px-3 py-3 text-base text-foreground">
+            <p className="text-accent">On iPhone or iPad, add this app to your Home Screen first:</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted-foreground">
+              <li>Tap the Share button in Safari.</li>
+              <li>Choose &ldquo;Add to Home Screen&rdquo;.</li>
+              <li>Open it from your Home Screen, then enable reminders here.</li>
+            </ol>
+          </div>
         )}
 
         {/* Global toggle */}
