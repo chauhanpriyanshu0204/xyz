@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Habit Widget</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: transparent;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-height: 100vh;
+    padding: 12px;
+  }
+  .widget {
+    background: #faf6ee;
+    border: 2px solid #c8b89a;
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    width: 260px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    cursor: move;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 1.5px dashed #c8b89a;
+    margin-bottom: 10px;
+  }
+  .left { display: flex; align-items: center; gap: 8px; }
+  .mood { font-size: 22px; }
+  .title { font-size: 15px; font-weight: 700; color: #3b6ea5; }
+  .minimize {
+    background: none; border: none; cursor: pointer;
+    font-size: 18px; color: #999; line-height: 1;
+    padding: 2px 6px; border-radius: 6px;
+  }
+  .minimize:hover { background: #ffe0e0; color: #e55; }
+  .score {
+    text-align: center; font-size: 12px; color: #7a8ca0;
+    font-weight: 600; margin-bottom: 10px;
+  }
+  .habit-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+  .habit-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff9f0; border: 1px solid #e8dcc8;
+    border-radius: 10px; padding: 7px 10px;
+  }
+  .habit-name {
+    flex: 1; font-size: 13px; color: #333;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 155px;
+  }
+  .habit-name.done { text-decoration: line-through; color: #bbb; }
+  .btns { display: flex; gap: 5px; }
+  .btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1.5px solid #ddd; background: #fff;
+    cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .btn.done-active { background: #e8f5e9; border-color: #4caf50; }
+  .btn.miss-active { background: #fce4e4; border-color: #e55; }
+  .empty { text-align: center; color: #bbb; font-size: 13px; padding: 10px 0; }
+  .footer {
+    margin-top: 10px; border-top: 1px dashed #e0d0c0;
+    padding-top: 8px; display: flex; gap: 6px;
+  }
+  .btn-sm {
+    flex: 1; background: #f0ebe0; border: 1px solid #c8b89a;
+    border-radius: 8px; padding: 5px; font-size: 11px;
+    color: #5a6a7a; cursor: pointer; text-align: center;
+  }
+  .btn-sm:hover { background: #e8ddd0; }
+  /* Minimized state */
+  .mini {
+    background: #faf6ee; border: 2px solid #c8b89a;
+    border-radius: 50px; padding: 8px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    position: fixed; bottom: 20px; right: 20px;
+    cursor: move; display: none; align-items: center; gap: 8px;
+    width: auto;
+  }
+  .mini-text { font-size: 13px; font-weight: 600; color: #3b6ea5; }
+</style>
+</head>
+<body>
+
+<!-- Mini bubble -->
+<div class="mini widget" id="mini">
+  <span id="miniMood" class="mood">📓</span>
+  <span class="mini-text" id="miniScore">0/0</span>
+</div>
+
+<!-- Full widget -->
+<div class="widget" id="widget">
+  <div class="header">
+    <div class="left">
+      <span class="mood" id="mood">📓</span>
+      <span class="title">My Habit Diary</span>
+    </div>
+    <button class="minimize" id="minBtn" title="Minimize">—</button>
+  </div>
+  <div class="score" id="score">Loading...</div>
+  <div class="habit-list" id="habitList"></div>
+  <div class="footer">
+    <button class="btn-sm" onclick="render()">🔄 Refresh</button>
+    <button class="btn-sm" onclick="window.open('https://habit-tracker-app-two-self.vercel.app')">🌐 Open App</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'habit-diary:v1';
+
+// Drag logic
+function makeDraggable(el) {
+  let ox, oy, sx, sy, dragging = false;
+  el.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    dragging = true;
+    const r = el.getBoundingClientRect();
+    sx = e.clientX; sy = e.clientY;
+    ox = r.left; oy = r.top;
+    el.style.right = 'auto'; el.style.bottom = 'auto';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    el.style.left = (ox + e.clientX - sx) + 'px';
+    el.style.top = (oy + e.clientY - sy) + 'px';
+  });
+  document.addEventListener('mouseup', () => dragging = false);
+}
+
+makeDraggable(document.getElementById('widget'));
+makeDraggable(document.getElementById('mini'));
+
+// Minimize / expand
+document.getElementById('minBtn').onclick = () => {
+  document.getElementById('widget').style.display = 'none';
+  const mini = document.getElementById('mini');
+  mini.style.display = 'flex';
+};
+document.getElementById('mini').onclick = (e) => {
+  if (e.target.tagName === 'BUTTON') return;
+  document.getElementById('mini').style.display = 'none';
+  document.getElementById('widget').style.display = 'block';
+};
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function loadHabits() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const p = JSON.parse(raw);
+    return Array.isArray(p) ? p : [];
+  } catch { return []; }
+}
+
+function saveHabits(habits) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(habits));
+}
+
+function toggle(id, key, force) {
+  const habits = loadHabits();
+  const h = habits.find(x => x.id === id);
+  if (!h) return;
+  if (force === 'empty') delete h.records[key];
+  else h.records[key] = force;
+  saveHabits(habits);
+  render();
+}
+
+function render() {
+  const habits = loadHabits();
+  const key = dateKey(new Date());
+  const total = habits.length;
+  const done = habits.filter(h => (h.records?.[key] ?? 'empty') === 'done').length;
+
+  const mood = total === 0 ? '📓' : done === total ? '😊' : done === 0 ? '😴' : '🙂';
+  document.getElementById('mood').textContent = mood;
+  document.getElementById('miniMood').textContent = mood;
+  const scoreText = total > 0 ? `${done}/${total} done today` : 'No habits yet!';
+  document.getElementById('score').textContent = scoreText;
+  document.getElementById('miniScore').textContent = `${done}/${total}`;
+
+  const list = document.getElementById('habitList');
+  if (total === 0) {
+    list.innerHTML = '<div class="empty">📝 Add habits in your browser app first, then refresh!</div>';
+    return;
+  }
+
+  list.innerHTML = habits.map(h => {
+    const st = h.records?.[key] ?? 'empty';
+    const doneForce = st === 'done' ? 'empty' : 'done';
+    const missForce = st === 'missed' ? 'empty' : 'missed';
+    return `<div class="habit-item">
+      <span class="habit-name ${st === 'done' ? 'done' : ''}">${h.name}</span>
+      <div class="btns">
+        <button class="btn ${st === 'done' ? 'done-active' : ''}" onclick="toggle('${h.id}','${key}','${doneForce}')" title="Done">✓</button>
+        <button class="btn ${st === 'missed' ? 'miss-active' : ''}" onclick="toggle('${h.id}','${key}','${missForce}')" title="Missed">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+setInterval(render, 10000);
+</script>
+</body>
+</html>
